@@ -1,0 +1,14 @@
+# Dataset
+cifar-10-batches-py/
+cifar-10-python.tar.gz
+
+# Environment
+config.env
+
+# Python
+__pycache__/
+*.pyc
+venv/
+
+# OS
+.DS_Store
