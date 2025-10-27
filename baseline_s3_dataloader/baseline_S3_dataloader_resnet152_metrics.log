@@ -1,0 +1,27 @@
+# Baseline S3 DataLoader Metrics - ResNet152
+# Generated on: 2025-10-27 16:38:45
+#
+# Performance Summary:
+Total S3 Calls: 3000
+Total Fetch Time: 163.09s
+Total DataLoader Time: 39.80s (72.0%)
+Total GPU Time: 15.50s (28.0%)
+Total Training Time: 55.29s
+Average S3 Fetch Time per Image: 0.054s
+S3 Calls per Second: 54.3
+
+# Detailed Metrics:
+total_s3_calls: 3000
+total_fetch_time: 163.0949158668518
+total_dataloader_time: 39.797303199768066
+total_gpu_time: 15.496565580368042
+total_training_time: 55.29386878013611
+avg_fetch_time: 0.05436497195561727
+dataloader_percentage: 71.97417015259553
+gpu_percentage: 28.02582984740446
+s3_calls_per_second: 54.25556334154948
+
+# Analysis:
+DataLoader Time: 72.0% (waiting for data)
+GPU Time: 28.0% (actual compute)
+Bottleneck: 72.0% waiting time

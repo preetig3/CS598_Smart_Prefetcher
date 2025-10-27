@@ -1,27 +1,27 @@
 # Baseline S3 DataLoader Metrics
-# Generated on: 2025-10-22 11:21:23
+# Generated on: 2025-10-27 16:35:55
 #
 # Performance Summary:
------Total S3 Calls: 3000
-Total Fetch Time: 180.55s
-Total DataLoader Time: 55.57s (96.3%)
-Total GPU Time: 2.16s (3.7%)
-Total Training Time: 57.72s
-Average S3 Fetch Time per Image: 0.060s
-S3 Calls per Second: 52.0
+Total S3 Calls: 3000
+Total Fetch Time: 188.71s
+Total DataLoader Time: 57.40s (96.0%)
+Total GPU Time: 2.37s (4.0%)
+Total Training Time: 59.76s
+Average S3 Fetch Time per Image: 0.063s
+S3 Calls per Second: 50.2
 
 # Detailed Metrics:
------total_s3_calls: 3000
-total_fetch_time: 180.54510974884033
-total_dataloader_time: 55.56798720359802
-total_gpu_time: 2.1555163860321045
-total_training_time: 57.72350358963013
-avg_fetch_time: 0.060181703249613444
-dataloader_percentage: 96.26579079233275
-gpu_percentage: 3.734209207667251
-s3_calls_per_second: 51.97189729382507
+total_s3_calls: 3000
+total_fetch_time: 188.70985388755798
+total_dataloader_time: 57.396202087402344
+total_gpu_time: 2.3666279315948486
+total_training_time: 59.76283001899719
+avg_fetch_time: 0.062903284629186
+dataloader_percentage: 96.03996676388559
+gpu_percentage: 3.9600332361144104
+s3_calls_per_second: 50.1984259956627
 
 # Analysis:
------DataLoader Time: 96.3% (waiting for data)
-GPU Time: 3.7% (actual compute)
-Bottleneck: 96.3% waiting time
+DataLoader Time: 96.0% (waiting for data)
+GPU Time: 4.0% (actual compute)
+Bottleneck: 96.0% waiting time
