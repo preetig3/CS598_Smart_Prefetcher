@@ -1,0 +1,12 @@
+# Seeded Prefetch DataLoader Metrics - ResNet152
+# Generated on: 2025-11-05 17:39:25
+
+total_s3_calls: 3000
+total_fetch_time: 248.01948928833008
+total_dataloader_time: 52.67090344429016
+total_gpu_time: 14.526259660720825
+total_training_time: 67.19716310501099
+avg_fetch_time: 0.08267316309611003
+dataloader_percentage: 78.38262957913832
+gpu_percentage: 21.617370420861683
+s3_calls_per_second: 44.64474185185186
