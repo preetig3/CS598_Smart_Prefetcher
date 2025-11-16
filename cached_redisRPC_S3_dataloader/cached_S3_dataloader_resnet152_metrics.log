@@ -1,0 +1,22 @@
+# Cached S3 DataLoader Metrics - ResNet152 (RAM + SSD + RPC-over-Redis owner map)
+# Generated on: 2025-11-12 17:43:34
+
+# Cache Performance (from log):
+RAM Cache Hits:    708 (23.6%)
+SSD Cache Hits:    0 (0.0%)
+RPC Owner Hits:    1292 (43.1%)
+S3 Fetches:        1000 (33.3%)
+Total Cache Ops:   3000
+Total Cache Hit Rate: 66.7%
+
+# Performance Summary:
+Total Data Requests: 3000
+Total Fetch Time: 70.01s
+Total DataLoader Time: 19.18s (66.8%)
+Total GPU Time: 9.53s (33.2%)
+Total Training Time: 28.71s
+Average Fetch Time per Image: 0.023s
+Data Requests per Second: 104.5
+
+# Analysis:
+L1+L2+RPC eliminated ~66.7% of S3 calls.

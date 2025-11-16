@@ -1,0 +1,4 @@
+ram_hits:745
+ssd_hits:0
+s3_fetches:2255
+ram_evictions:0

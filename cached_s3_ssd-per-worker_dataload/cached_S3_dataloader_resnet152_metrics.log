@@ -1,0 +1,23 @@
+# Cached S3 DataLoader Metrics - ResNet152
+# Generated on: 2025-11-12 15:49:51
+#
+# Cache Performance (from log file):
+RAM Cache Hits: 742 (24.7%)
+SSD Cache Hits: 3 (0.1%)
+S3 Fetches: 2255 (75.2%)
+Total Cache Operations: 3000
+Total Cache Hit Rate: 24.8%
+
+# Performance Summary:
+Total Data Requests: 3000
+Total Fetch Time: 157.92s
+Total DataLoader Time: 42.08s (80.9%)
+Total GPU Time: 9.92s (19.1%)
+Total Training Time: 52.00s
+Average Fetch Time per Image: 0.053s
+Data Requests per Second: 57.7
+
+# Analysis:
+Cache eliminated 24.8% of S3 calls
+DataLoader Time: 80.9% (waiting for data)
+GPU Time: 19.1% (actual compute)
