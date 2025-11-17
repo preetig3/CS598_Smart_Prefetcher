@@ -34,4 +34,13 @@ cd ~
 source ~/mlenv/bin/activate
 python cached_resnet_rpc.py
 
+To rerun and clean:
+
+On each Training Worker:
+rm -rf /users/(username)/ssd_cache_worker
+
+On the main training node:
+redis-cli
+FLUSHALL
+
 
