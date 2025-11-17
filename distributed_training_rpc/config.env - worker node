@@ -1,0 +1,29 @@
+cd ~
+cat > config.env << 'EOF'
+
+BUCKET_NAME=cs598-cifar-10
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+AWS_REGION=us-east-1
+
+NUM_IMAGES=1000
+
+REDIS_HOST=128.110.96.56
+REDIS_PORT=6379
+REDIS_DB=0
+REDIS_PASSWORD=
+REDIS_OWNER_PREFIX=cifar10
+OWNER_TTL_SEC=600
+
+ROLE=worker
+RAM_CACHE_SIZE_MB=2048
+SSD_CACHE_DIR=/users/preetig3/ssd_cache_worker
+
+
+NUM_SHARDS=4
+SHARD_ID=3  # change per node: 0 on worker0, 1 on worker1, 2 on worker2, 3 on worker3
+
+# Use the worker's IP so the trainer can connect.
+RPC_BIND_HOST=128.110.96.60
+RPC_PORT=0
+EOF

@@ -1,0 +1,37 @@
+(On All Nodes)
+cd ~
+python3 -m venv --without-pip mlenv
+source ~/mlenv/bin/activate
+curl -O https://bootstrap.pypa.io/get-pip.py
+~/mlenv/bin/python ~/get-pip.py
+~/mlenv/bin/pip install torch torchvision boto3 redis python-dotenv numpy
+
+
+Save: cached_resnet_rpc.py
+cd ~
+cat > cached_resnet_rpc.py
+
+(paste into input)
+
+control D
+
+Save: config.env
+
+(copy paste into each node)
+
+
+(On Main Node)
+sudo apt-get update
+sudo apt-get install -y redis-server
+
+(On Each Worker)
+cd ~
+source ~/mlenv/bin/activate      
+python cached_resnet_rpc.py
+
+(On Main Node)
+cd ~
+source ~/mlenv/bin/activate
+python cached_resnet_rpc.py
+
+

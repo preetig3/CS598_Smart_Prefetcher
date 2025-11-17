@@ -21,13 +21,12 @@ from pathlib import Path
 from dotenv import load_dotenv
 from torch.utils.data import Dataset, DataLoader, get_worker_info
 
-# ---- Redis (pip install redis) ----
 try:
     import redis
 except ImportError as e:
     raise ImportError("Please `pip install redis` to use the Redis-backed owner map (no image data stored).") from e
 
-# -------------------- Device & Env --------------------
+# Device & Env
 device = torch.device('cuda' if torch.cuda.is_available()
                       else 'mps' if torch.backends.mps.is_available()
                       else 'cpu')
@@ -36,7 +35,7 @@ load_dotenv('../config.env')
 
 logger = 'pipeline_activity_resnet152_cached.log'
 
-# ==================== Helper Logging ====================
+# Helper Logging
 def log_worker_fetch(worker_id, image_idx, fetch_time, source='S3'):
     try:
         with open(logger, 'a') as f:
@@ -126,7 +125,7 @@ def save_metrics_log(metrics, cache_stats):
     except Exception as e:
         print(f"Error saving metrics: {e}")
 
-# ==================== Redis Owner Registry (no image bytes) ====================
+# Redis Owner Registry (no image bytes)
 class OwnerRegistry:
     """
     Tracks which worker owns an index via Redis string keys:
@@ -160,7 +159,7 @@ class OwnerRegistry:
         except Exception:
             pass
 
-# ==================== Tiny XML-RPC server (per worker) ====================
+# Tiny XML-RPC server (per worker)
 class ThreadingXMLRPCServer(ThreadingMixIn, SimpleXMLRPCServer):
     daemon_threads = True
     allow_reuse_address = True
@@ -228,7 +227,7 @@ class RamSsdRpcCache:
         # Bring up RPC server (bind to port, start thread)
         self._ensure_rpc_server()
 
-    # ---------- Stats helpers ----------
+    # Stats helpers
     def _init_stats_file(self):
         if not self.cache_stats_file.exists():
             with open(self.cache_stats_file, 'w') as f:
@@ -269,7 +268,7 @@ class RamSsdRpcCache:
             except Exception:
                 pass
 
-    # ---------- RPC server setup ----------
+    # RPC server setup 
     def _ensure_rpc_server(self):
         if self._rpc_server is not None:
             return
@@ -306,19 +305,19 @@ class RamSsdRpcCache:
         self._rpc_thread.start()
         # print(f"[Worker RPC] Listening at {self.rpc_endpoint}")
 
-    # ---------- Keys & file paths ----------
+    # Keys & file paths 
     def _cache_key(self, idx: int) -> str:
         return f"image_{idx}"
 
     def _ssd_path(self, cache_key: str) -> Path:
         return self.ssd_dir / f"{cache_key}.pkl"
 
-    # ---------- Size in RAM ----------
+    # Size in RAM
     def _estimate_ram_size(self, data):
         image_tensor, label = data
         return image_tensor.element_size() * image_tensor.nelement() + 8
 
-    # ---------- L1: RAM ----------
+    # L1: RAM
     def _put_ram(self, cache_key: str, data):
         data_size = self._estimate_ram_size(data)
         while (self.ram_cache_current_size + data_size > self.ram_cache_size_bytes) and len(self.ram_cache) > 0:
@@ -333,7 +332,7 @@ class RamSsdRpcCache:
         self.ram_cache[cache_key] = data
         self.ram_cache_current_size += data_size
 
-    # ---------- L2: SSD ----------
+    #  L2: SSD
     def _put_ssd(self, cache_key: str, data):
         path = self._ssd_path(cache_key)
         tmp = path.with_suffix('.tmp')
@@ -362,7 +361,7 @@ class RamSsdRpcCache:
                 pass
             return None
 
-    # ---------- Public API ----------
+
     def get(self, idx: int):
         """
         Returns (data, source) where data=(tensor,label) or None, source in {RAM, SSD, RPC, MISS}
@@ -433,7 +432,7 @@ class RamSsdRpcCache:
         self._local_stats['s3_fetches'] += 1
         self._update_global_stats('s3_fetches')
 
-# ==================== Dataset ====================
+# Dataset 
 class CachedS3CIFAR10Dataset(Dataset):
     """
     CIFAR-10 from S3 with per-worker L1 (RAM) + L2 (SSD) and shared owner map (Redis) + RPC.
@@ -572,7 +571,7 @@ class CachedS3CIFAR10Dataset(Dataset):
             print(f"Error fetching image {idx + 1} from S3: {e}")
             return None, None, 0.0, -1
 
-# ==================== Dataloader utils ====================
+# Dataloader utils
 def collate_fn(batch):
     valid = [b for b in batch if b[0] is not None]
     if not valid:
@@ -580,7 +579,7 @@ def collate_fn(batch):
     imgs, labels, fetch_times, idxs = zip(*valid)
     return torch.stack(imgs), torch.tensor(labels, dtype=torch.long), float(np.mean(fetch_times)), list(idxs)
 
-# ==================== Training ====================
+# Training
 def train_model(dataloader, cache_stats_file, num_epochs: int = 5, learning_rate: float = 0.001):
     print("Starting CACHED training with ResNet152 (RAM + SSD + RPC)")
     print("-----")
@@ -784,7 +783,6 @@ def cleanup_redis_keys(host, port, db, password, prefix, mode="scan"):
     except Exception as e:
         print(f"Redis cleanup warning: {e}")
 
-# ==================== Main ====================
 if __name__ == "__main__":
     BUCKET_NAME = os.getenv('BUCKET_NAME')
     AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
