@@ -13,13 +13,12 @@ from pathlib import Path
 from dotenv import load_dotenv
 from torch.utils.data import Dataset, DataLoader, get_worker_info
 
-# ---- Redis (pip install redis) ----
 try:
     import redis
 except ImportError as e:
     raise ImportError("Please `pip install redis` to use the Redis-backed cache.") from e
 
-# -------------------- Device & Env --------------------
+#  Device & Env
 device = torch.device('cuda' if torch.cuda.is_available()
                       else 'mps' if torch.backends.mps.is_available()
                       else 'cpu')
@@ -29,7 +28,7 @@ load_dotenv('../config.env')
 logger = 'pipeline_activity_resnet152_cached.log'
 
 
-# ==================== Helper Logging ====================
+# Helper Logging 
 def log_worker_fetch(worker_id, image_idx, fetch_time, source='S3'):
     try:
         with open(logger, 'a') as f:
@@ -124,7 +123,7 @@ def save_metrics_log(metrics, cache_stats):
         print(f"Error saving metrics: {e}")
 
 
-# ==================== Redis cleanup helper ====================
+# Redis cleanup helper 
 def cleanup_redis_keys(host, port, db, password, prefix, mode="scan"):
     """
     Clear Redis keys at the end of the run.
@@ -162,7 +161,7 @@ def cleanup_redis_keys(host, port, db, password, prefix, mode="scan"):
         print(f"Redis cleanup warning: {e}")
 
 
-# ==================== L1 (RAM) + L2 (SSD/worker) + L3 (Redis) Cache ====================
+# L1 (RAM) + L2 (SSD/worker) + L3 (Redis) Cache 
 class RamSsdRedisCache:
     """
     Per-worker L1 RAM cache + per-worker L2 SSD cache + shared L3 Redis cache.
@@ -209,7 +208,7 @@ class RamSsdRedisCache:
             'ram_evictions': 0,
         }
 
-    # ---------- Stats helpers ----------
+    # Stats helpers 
     def _init_stats_file(self):
         if not self.cache_stats_file.exists():
             with open(self.cache_stats_file, 'w') as f:
@@ -250,7 +249,7 @@ class RamSsdRedisCache:
             except Exception:
                 pass
 
-    # ---------- Keys & file paths ----------
+    #  Keys & file paths 
     def _cache_key(self, idx: int) -> str:
         return f"image_{idx}"
 
@@ -260,13 +259,13 @@ class RamSsdRedisCache:
     def _redis_key(self, idx: int) -> str:
         return f"{self.key_prefix}{idx}"
 
-    # ---------- Size in RAM ----------
+    # Size in RAM 
     def _estimate_ram_size(self, data):
         # data: (torch.float32 CHW [0..1], label)
         image_tensor, label = data
         return image_tensor.element_size() * image_tensor.nelement() + 8
 
-    # ---------- L1: RAM ----------
+    # L1: RAM
     def _put_ram(self, cache_key: str, data):
         data_size = self._estimate_ram_size(data)
         while (self.ram_cache_current_size + data_size > self.ram_cache_size_bytes) and len(self.ram_cache) > 0:
@@ -281,7 +280,7 @@ class RamSsdRedisCache:
         self.ram_cache[cache_key] = data
         self.ram_cache_current_size += data_size
 
-    # ---------- L2: SSD ----------
+    # L2: SSD 
     def _put_ssd(self, cache_key: str, data):
         path = self._ssd_path(cache_key)
         tmp = path.with_suffix('.tmp')
@@ -310,7 +309,7 @@ class RamSsdRedisCache:
                 pass
             return None
 
-    # ---------- L3: Redis ----------
+    # L3: Redis 
     @staticmethod
     def _pack_for_redis(image_tensor: torch.Tensor, label: int) -> bytes:
         # CHW float32 [0..1] -> uint8 CHW ndarray; then pickle (ndarray, label)
@@ -323,7 +322,6 @@ class RamSsdRedisCache:
         t = torch.from_numpy(arr).to(torch.float32) / 255.0
         return t, int(label)
 
-    # ---------- Public API ----------
     def get(self, idx: int):
         key = self._cache_key(idx)
 
@@ -388,7 +386,7 @@ class RamSsdRedisCache:
         self.ram_cache_current_size = 0
 
 
-# ==================== Dataset ====================
+# Dataset
 class CachedS3CIFAR10Dataset(Dataset):
     """
     CIFAR-10 from S3 with per-worker L1 (RAM) + L2 (SSD) and shared L3 (Redis).
@@ -529,7 +527,7 @@ class CachedS3CIFAR10Dataset(Dataset):
             return None, None, 0.0, -1
 
 
-# ==================== Dataloader utils ====================
+# Dataloader utils
 def collate_fn(batch):
     valid = [b for b in batch if b[0] is not None]
     if not valid:
@@ -538,7 +536,7 @@ def collate_fn(batch):
     return torch.stack(imgs), torch.tensor(labels, dtype=torch.long), float(np.mean(fetch_times)), list(idxs)
 
 
-# ==================== Training ====================
+# Training
 def train_model(dataloader, cache_stats_file, num_epochs: int = 5, learning_rate: float = 0.001):
     print("Starting CACHED training with ResNet152 (RAM + SSD + Redis)")
     print("-----")
@@ -827,7 +825,7 @@ if __name__ == "__main__":
         hit_rate = (cache_stats['ram_hits'] + cache_stats['ssd_hits'] + cache_stats['redis_hits']) / total_ops * 100
         print(f"\nCache eliminated {hit_rate:.1f}% of S3 calls!")
 
-    # --------- Final Redis cleanup (safe) ---------
+    # Final Redis cleanup (safe)
     try:
         cleanup_redis_keys(
             host=REDIS_HOST,
